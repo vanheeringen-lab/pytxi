@@ -1,6 +1,7 @@
 """Console script for pytxi."""
 import argparse
 import sys
+import os
 
 import pytxi
 
@@ -22,11 +23,19 @@ def main():
     parser.add_argument(
         "outdir", help="name of output directory"
     )
+    parser.add_argument(
+        "-s", "--species", help="species tax_id or genomepy genome name", default=None
+    )
+    parser.add_argument(
+        "--tx2gene", help="tx2gene file (default is lookup from mygene.info)", default=None
+    )
     args = parser.parse_args()
 
+    outdir = args.outdir
+    os.makedirs(outdir, exist_ok=True)
 
     txi = pytxi.TxImport()
-    txi.import_files(args.input)
+    txi.import_files(args.input, tx2gene=args.tx2gene, species=args.species)
     txi.abundance.to_csv(f"{outdir}/abundance.tsv", sep="\t")
     txi.counts.to_csv(f"{outdir}/counts.tsv", sep="\t")
     txi.length.to_csv(f"{outdir}/length.tsv", sep="\t")
