@@ -60,7 +60,7 @@ class TxImport:
         try:
             # genomepy genome name/fasta
             g = Genome(species)
-            logger.info(f"Using tax_id {g.tax_id} from genome {species.name}")
+            logger.info(f"Using tax_id {g.tax_id} from genome {g.name}")
             return g.tax_id
         except FileNotFoundError:
             logger.error(
