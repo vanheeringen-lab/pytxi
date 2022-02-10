@@ -5,6 +5,7 @@ import os
 
 import pytxi
 
+
 def main():
     """Console script for pytxi."""
     parser = argparse.ArgumentParser(
@@ -24,7 +25,7 @@ def main():
         "outdir", help="name of output directory"
     )
     parser.add_argument(
-        "-s", "--species", help="species tax_id or genomepy genome name", default=None
+        "-s", "--species", help="species tax_id or genomepy genome name (default is human, 9606)", default=None
     )
     parser.add_argument(
         "--tx2gene", help="tx2gene file (default is lookup from mygene.info)", default=None
@@ -39,6 +40,7 @@ def main():
     txi.abundance.to_csv(f"{outdir}/abundance.tsv", sep="\t")
     txi.counts.to_csv(f"{outdir}/counts.tsv", sep="\t")
     txi.length.to_csv(f"{outdir}/length.tsv", sep="\t")
+
 
 if __name__ == "__main__":
     sys.exit(main())

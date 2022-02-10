@@ -1,4 +1,3 @@
-from glob import glob
 import sys
 
 import pandas as pd
@@ -8,7 +7,7 @@ from loguru import logger
 from genomepy.annotation import query_mygene
 from genomepy import Genome
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 FMTS = {
@@ -28,10 +27,16 @@ SALMON_COLS = ["Length", "EffectiveLength", "TPM", "NumReads"]
 
 
 class TxImport:
+    tx2gene = None
+    abundance = None
+    length = None
+    counts = None
+
     def __init__(self):
         pass
 
-    def _parse_species(self, species):
+    @staticmethod
+    def _parse_species(species):
         if species is None:
             logger.info("Using default tax_id 9606 (human)")
             return 9606
@@ -45,6 +50,7 @@ class TxImport:
             pass
 
         try:
+            # genomepy.Genome object
             tax_id = species.tax_id
             logger.info(f"Using tax_id {tax_id} from genome {species.name}")
             return tax_id
@@ -52,12 +58,13 @@ class TxImport:
             pass
 
         try:
+            # genomepy genome name/fasta
             g = Genome(species)
-            logger.info(f"Using tax_id {g.tax_id} from genome {species}")
+            logger.info(f"Using tax_id {g.tax_id} from genome {species.name}")
             return g.tax_id
         except FileNotFoundError:
             logger.error(
-                "Provided species is not a tax_id and I cannot find a genome with the name {species}"
+                f"Provided species is not a tax_id and I cannot find a genome with the name {species}"
             )
             logger.error("Don't know what to do now :(")
             sys.exit()
@@ -77,7 +84,7 @@ class TxImport:
                 r"\.[\d_]+$", "", regex=True
             )
             result = query_mygene(
-                transcripts, tax_id, "symbol", batch_size=10000
+                transcripts, tax_id, "symbol"
             )
             result = result[["symbol"]]
         self.tx2gene = result
@@ -107,29 +114,25 @@ class TxImport:
 
         dfs = [pd.read_table(fname, index_col=0) for fname in fnames]
 
-        filetype = None
-        for name, (cols, use_cols) in FMTS.items():
+        for filetype, (cols, use_cols) in FMTS.items():
             if dfs[0].shape[1] == len(cols) and list(dfs[0].columns) == cols:
-                filetype = name
-                TPM, COUNTS, EFFLENGTH = use_cols
+                logger.info(f"Detected {filetype} files")
+                tpm_col, counts_col, length_col = use_cols
                 break
-
-        if not filetype:
+        else:
             logger.error("Unknown filetype")
             logger.error(dfs[0].columns)
             sys.exit()
 
-        logger.info(f"Detected {filetype} files")
-
-        tpm = pd.concat([df[TPM] for df in dfs], axis=1)
+        tpm = pd.concat([df[tpm_col] for df in dfs], axis=1)
         tpm.columns = sample_names
 
         self.set_tx2gene(tx2gene, tpm.index, species)
 
-        counts = pd.concat([df[COUNTS] for df in dfs], axis=1)
+        counts = pd.concat([df[counts_col] for df in dfs], axis=1)
         counts.columns = sample_names
 
-        length = pd.concat([df[EFFLENGTH] for df in dfs], axis=1)
+        length = pd.concat([df[length_col] for df in dfs], axis=1)
         length.columns = sample_names
 
         default_len = length.join(self.tx2gene).groupby("symbol").mean().mean(1)
