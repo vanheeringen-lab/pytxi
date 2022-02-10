@@ -83,9 +83,7 @@ class TxImport:
             transcripts = transcript_ids.str.replace(
                 r"\.[\d_]+$", "", regex=True
             )
-            result = query_mygene(
-                transcripts, tax_id, "symbol"
-            )
+            result = query_mygene(transcripts, tax_id, "symbol")
             result = result[["symbol"]]
         self.tx2gene = result
 

@@ -19,16 +19,18 @@ def main():
     )
     parser.add_argument(
         "input", help="input file(s) in salmon or kallisto format", nargs="+"
-
+    )
+    parser.add_argument("outdir", help="name of output directory")
+    parser.add_argument(
+        "-s",
+        "--species",
+        help="species tax_id or genomepy genome name (default is human, 9606)",
+        default=None,
     )
     parser.add_argument(
-        "outdir", help="name of output directory"
-    )
-    parser.add_argument(
-        "-s", "--species", help="species tax_id or genomepy genome name (default is human, 9606)", default=None
-    )
-    parser.add_argument(
-        "--tx2gene", help="tx2gene file (default is lookup from mygene.info)", default=None
+        "--tx2gene",
+        help="tx2gene file (default is lookup from mygene.info)",
+        default=None,
     )
     args = parser.parse_args()
 
