@@ -80,11 +80,16 @@ class TxImport:
             if not isinstance(transcript_ids, pd.Series):
                 transcript_ids = pd.Series(transcript_ids)
 
+            # remove id version, examples:
+            # geneA.123 (removes .123)
+            # geneB.__ (removes .__)
+            # NC1234.1::1..10 (removes .1::1..10)
             transcripts = transcript_ids.str.replace(
-                r"\.[\d_]+$", "", regex=True
+                r"\.[\d_]+(::\d+\.\.\d+)?$", "", regex=True
             )
             result = query_mygene(transcripts, tax_id, "symbol")
-            result = result[["symbol"]]
+            result.index = transcript_ids  # tx
+            result = result[["symbol"]]  # gene
         self.tx2gene = result
 
     def import_files(
