@@ -136,7 +136,7 @@ class TxImport:
         default_len = length.join(self.tx2gene).groupby("symbol").mean().mean(1)
 
         abundance = tpm.join(self.tx2gene).groupby("symbol").sum()
-        counts = counts.join(self.tx2gene).groupby("symbol").sum()
+        counts = counts.join(self.tx2gene).groupby("symbol").sum().astype(int)
 
         length = length.mul(tpm)
         length[length == 0] = np.nan
