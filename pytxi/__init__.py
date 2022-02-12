@@ -72,7 +72,7 @@ class TxImport:
     def set_tx2gene(self, tx2gene=None, transcript_ids=None, species=None):
         if tx2gene:
             logger.info("Using provided tx2gene file")
-            result = pd.read_csv(tx2gene, index_col=0, sep="\t")
+            result = pd.read_table(tx2gene, index_col=0)
             result.columns = ["symbol"]
         else:
             logger.info("Mapping transcripts to genes using mygene.info")
@@ -158,6 +158,11 @@ class TxImport:
             length.loc[length[col].isna(), col] = mean_length[
                 length[col].isna()
             ]
+
+        if len(counts) == 0:
+            raise ValueError(
+                "tx2gene and input files have no overlapping transcript_ids."
+            )
 
         self.abundance = abundance
         self.length = length
