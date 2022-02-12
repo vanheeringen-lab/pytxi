@@ -72,7 +72,7 @@ class TxImport:
     def set_tx2gene(self, tx2gene=None, transcript_ids=None, species=None):
         if tx2gene:
             logger.info("Using provided tx2gene file")
-            result = pd.read_csv(tx2gene, index_col=0)
+            result = pd.read_csv(tx2gene, index_col=0, sep="\t")
             result.columns = ["symbol"]
         else:
             logger.info("Mapping transcripts to genes using mygene.info")
