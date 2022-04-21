@@ -32,6 +32,8 @@ def main():
         help="tx2gene file (default is lookup from mygene.info)",
         default=None,
     )
+    if len(sys.argv) == 1:
+        return parser.print_help()
     args = parser.parse_args()
 
     outdir = args.outdir
