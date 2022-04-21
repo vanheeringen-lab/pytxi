@@ -7,7 +7,7 @@ from loguru import logger
 from genomepy.annotation import query_mygene
 from genomepy import Genome
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 FMTS = {
@@ -64,7 +64,8 @@ class TxImport:
             return g.tax_id
         except FileNotFoundError:
             logger.error(
-                f"Provided species is not a tax_id and I cannot find a genome with the name {species}"
+                "Provided species is not a tax_id and "
+                f"I cannot find a genome with the name {species}"
             )
             logger.error("Don't know what to do now :(")
             sys.exit()
@@ -92,9 +93,7 @@ class TxImport:
             result = result[["symbol"]]  # gene
         self.tx2gene = result
 
-    def import_files(
-        self, fnames, sample_names=None, tx2gene=None, species=None
-    ):
+    def import_files(self, fnames, sample_names=None, tx2gene=None, species=None):
         """Convert transcriptome-level quantification to gene_level quantification.
 
         Parameters
@@ -145,9 +144,7 @@ class TxImport:
 
         length = length.mul(tpm)
         length[length == 0] = np.nan
-        length = (
-            length.join(self.tx2gene).groupby("symbol").sum().div(abundance)
-        )
+        length = length.join(self.tx2gene).groupby("symbol").sum().div(abundance)
 
         f = length.mean(1).isna()
         for col in length.columns:
@@ -155,9 +152,7 @@ class TxImport:
 
         mean_length = length.mean(1)
         for col in length.columns:
-            length.loc[length[col].isna(), col] = mean_length[
-                length[col].isna()
-            ]
+            length.loc[length[col].isna(), col] = mean_length[length[col].isna()]
 
         if len(counts) == 0:
             raise ValueError(
